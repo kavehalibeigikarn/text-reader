@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">صفحه‌خوان</string>
+    <string name="read_aloud">بلند بخوان</string>
+    <string name="service_label">صفحه‌خوان (دکمه شناور)</string>
+    <string name="service_desc">متن صفحه را از هر اپلیکیشنی (مرورگر، پیام‌رسان، اخبار، PDF) برمی‌دارد و با صدا می‌خواند. برای متن‌های تصویری از تشخیص متن (OCR) روی تصویر صفحه استفاده می‌کند. هیچ داده‌ای از گوشی خارج نمی‌شود.</string>
+</resources>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:layoutDirection="rtl">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:paddingBottom="12dp" />
+
+        <!-- ۱. سرویس -->
+        <com.google.android.material.card.MaterialCardView style="@style/Card">
+            <LinearLayout style="@style/CardBody">
+                <TextView style="@style/CardTitle" android:text="۱. فعال‌سازی سرویس" />
+                <TextView android:id="@+id/tvService"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textSize="15sp" android:paddingBottom="8dp" />
+                <Button android:id="@+id/btnAccessibility"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="باز کردن تنظیمات دسترسی‌پذیری" />
+                <TextView
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textSize="13sp" android:paddingTop="8dp"
+                    android:text="اگر سرویس خاکستری بود و پیام «تنظیمات محدودشده» آمد: دکمه زیر را بزنید، از منوی ⋮ بالای صفحه گزینه «Allow restricted settings» را بزنید و دوباره سرویس را روشن کنید." />
+                <Button android:id="@+id/btnAppInfo"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="اطلاعات برنامه (مجوز تنظیمات محدودشده)" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ۲. صدا -->
+        <com.google.android.material.card.MaterialCardView style="@style/Card">
+            <LinearLayout style="@style/CardBody">
+                <TextView style="@style/CardTitle" android:text="۲. موتور صدا" />
+                <Spinner android:id="@+id/spEngine"
+                    android:layout_width="match_parent" android:layout_height="wrap_content" />
+                <TextView android:id="@+id/tvLang"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textSize="14sp" android:paddingTop="6dp" android:paddingBottom="6dp" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <Button android:id="@+id/btnTtsSettings"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:text="تنظیمات TTS" />
+                    <Button android:id="@+id/btnInstallVoice"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:layout_height="wrap_content" android:text="نصب داده صدا" />
+                </LinearLayout>
+                <TextView android:id="@+id/tvRate"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:paddingTop="10dp" />
+                <SeekBar android:id="@+id/sbRate"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:max="30" />
+                <TextView android:id="@+id/tvPitch"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:paddingTop="6dp" />
+                <SeekBar android:id="@+id/sbPitch"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:max="30" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ۳. OCR -->
+        <com.google.android.material.card.MaterialCardView style="@style/Card">
+            <LinearLayout style="@style/CardBody">
+                <TextView style="@style/CardTitle" android:text="۳. زبان تشخیص متن از تصویر (🔍)" />
+                <RadioGroup android:id="@+id/rgOcr"
+                    android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <RadioButton android:id="@+id/rbFas"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="فقط فارسی (سریع‌تر)" />
+                    <RadioButton android:id="@+id/rbFasEng"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="فارسی + انگلیسی" />
+                    <RadioButton android:id="@+id/rbEng"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="فقط انگلیسی" />
+                </RadioGroup>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ۴. گزینه‌ها -->
+        <com.google.android.material.card.MaterialCardView style="@style/Card">
+            <LinearLayout style="@style/CardBody">
+                <TextView style="@style/CardTitle" android:text="۴. گزینه‌ها" />
+                <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/swPanel"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="نمایش دکمه شناور" />
+                <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/swContinuous"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="خواندن پیوسته (اسکرول خودکار تا انتهای صفحه/کتاب)" />
+                <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/swSkipButtons"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="نخواندن دکمه‌ها و آیکون‌ها" />
+                <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/swAutoLang"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="جمله‌های انگلیسی با صدای انگلیسی" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ۵. آزمایش -->
+        <com.google.android.material.card.MaterialCardView style="@style/Card">
+            <LinearLayout style="@style/CardBody">
+                <TextView style="@style/CardTitle" android:text="۵. آزمایش صدا" />
+                <EditText android:id="@+id/etTest"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minLines="3" android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:text="سلام. این یک متن آزمایشی است. قیمت طلا امروز افزایش یافت. The market opened higher today." />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <Button android:id="@+id/btnSpeak"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:text="بخوان" />
+                    <Button android:id="@+id/btnStop"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:layout_height="wrap_content" android:text="توقف" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:paddingTop="8dp"
+            android:lineSpacingExtra="4dp"
+            android:text="راهنمای دکمه شناور:\n🔊 باز/بسته کردن منو (با کشیدن جابه‌جا می‌شود)\n📖 خواندن متن صفحه (وب، پیام‌رسان، اخبار، PDF)\n🔍 تشخیص متن از تصویر صفحه (PDF اسکن‌شده، عکس، کتاب تصویری)\n⏸ مکث / ادامه     ⏪ ⏩ جمله قبل / بعد\n⏭ صفحه بعد     ⏹ توقف\n\nهمچنین: هر متنی را در هر اپی انتخاب کنید و از منو «بلند بخوان» را بزنید." />
+    </LinearLayout>
+</ScrollView>
