@@ -12,10 +12,15 @@ object Prefs {
         }
     }
 
-    /** پکیج موتور TTS؛ null یعنی موتور پیش‌فرض سیستم */
+    /** موتور TTS فارسی؛ null یعنی موتور پیش‌فرض سیستم */
     var enginePackage: String?
         get() = sp.getString("engine", null)
         set(v) = sp.edit().putString("engine", v).apply()
+
+    /** موتور جداگانه برای جمله‌های انگلیسی؛ null یعنی خودکار (Google اگر نصب باشد) */
+    var englishEnginePackage: String?
+        get() = sp.getString("engine_en", null)
+        set(v) = sp.edit().putString("engine_en", v).apply()
 
     var speechRate: Float
         get() = sp.getFloat("rate", 1.0f)

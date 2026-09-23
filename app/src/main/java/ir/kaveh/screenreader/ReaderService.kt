@@ -56,6 +56,7 @@ class ReaderService : AccessibilityService() {
         wm = getSystemService(WINDOW_SERVICE) as WindowManager
         Speaker.addListener(stateListener)
         Speaker.onFinished = { onSpeechFinished() }
+        Speaker.onWarning = { showWarning(it) }
         if (Prefs.showPanel) showPanel()
     }
 
@@ -71,6 +72,7 @@ class ReaderService : AccessibilityService() {
         Speaker.stop()
         Speaker.removeListener(stateListener)
         Speaker.onFinished = null
+        Speaker.onWarning = null
         removePanel()
         instance = null
         super.onDestroy()
@@ -202,6 +204,8 @@ class ReaderService : AccessibilityService() {
     private fun setBusy(b: Boolean) { busy = b; updateIcons() }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
+    fun showWarning(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
 
     // ───────────────────────── خواندن ─────────────────────────
 

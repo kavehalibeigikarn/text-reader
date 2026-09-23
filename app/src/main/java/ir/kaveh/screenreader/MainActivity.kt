@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvService: TextView
     private lateinit var tvLang: TextView
     private lateinit var spEngine: Spinner
+    private lateinit var spEngineEn: Spinner
     private lateinit var tvRate: TextView
     private lateinit var tvPitch: TextView
 
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         tvService = findViewById(R.id.tvService)
         tvLang = findViewById(R.id.tvLang)
         spEngine = findViewById(R.id.spEngine)
+        spEngineEn = findViewById(R.id.spEngineEn)
         tvRate = findViewById(R.id.tvRate)
         tvPitch = findViewById(R.id.tvPitch)
 
@@ -81,11 +83,24 @@ class MainActivity : AppCompatActivity() {
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+
+        spEngineEn.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (fillingSpinner) return
+                val pkg = enginePkgs.getOrNull(position) ?: return
+                if (pkg != Speaker.englishEngine()) {
+                    Prefs.englishEnginePackage = pkg
+                    Speaker.reload()
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     override fun onResume() {
         super.onResume()
         Speaker.addListener(speakerListener)
+        Speaker.onWarning = { Toast.makeText(this, it, Toast.LENGTH_LONG).show() }
         refreshService()
         refreshEngines()
         refreshLang()
@@ -93,6 +108,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         Speaker.removeListener(speakerListener)
+        Speaker.onWarning = ReaderService.instance?.let { svc -> { msg: String -> svc.showWarning(msg) } }
         super.onPause()
     }
 
@@ -130,8 +146,11 @@ class MainActivity : AppCompatActivity() {
         val labels = engines.map { it.label ?: it.name }
         fillingSpinner = true
         spEngine.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
+        spEngineEn.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
         val idx = enginePkgs.indexOf(currentEngine())
         if (idx >= 0) spEngine.setSelection(idx, false)
+        val idxEn = enginePkgs.indexOf(Speaker.englishEngine() ?: currentEngine())
+        if (idxEn >= 0) spEngineEn.setSelection(idxEn, false)
         spEngine.post { fillingSpinner = false }
     }
 
@@ -144,7 +163,7 @@ class MainActivity : AppCompatActivity() {
             TextToSpeech.LANG_AVAILABLE, TextToSpeech.LANG_COUNTRY_AVAILABLE,
             TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE -> "✅ این موتور صدای فارسی دارد."
             TextToSpeech.LANG_MISSING_DATA -> "⚠️ فارسی پشتیبانی می‌شود ولی داده صدا نصب نیست؛ «نصب داده صدا» را بزنید."
-            else -> "❌ این موتور فارسی ندارد. یک موتور TTS فارسی نصب کنید و از فهرست بالا انتخابش کنید."
+            else -> "❌ این موتور فارسی ندارد. یک موتور TTS فارسی (مثل Sherpa-onnx فارسی یا eSpeak NG) نصب کنید و در «موتور فارسی» انتخابش کنید."
         }
     }
 
