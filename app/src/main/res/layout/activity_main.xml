@@ -17,6 +17,13 @@
             android:text="@string/app_name"
             android:textSize="26sp"
             android:textStyle="bold"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/tvVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
             android:paddingBottom="12dp" />
 
         <!-- ۱. سرویس -->
@@ -81,6 +88,35 @@
                 <SeekBar android:id="@+id/sbPitch"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:max="30" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ۲.۵ صدای ابری -->
+        <com.google.android.material.card.MaterialCardView style="@style/Card">
+            <LinearLayout style="@style/CardBody">
+                <TextView style="@style/CardTitle" android:text="صدای ابری (Gemini TTS)" />
+                <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/swCloud"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="استفاده از صدای ابری به‌جای موتور گوشی" />
+                <TextView
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textSize="13sp" android:paddingTop="4dp" android:paddingBottom="6dp"
+                    android:text="کیفیت خیلی طبیعی‌تر، ولی نیاز به اینترنت و کلید API از aistudio.google.com دارد و متن صفحه برای خوانده‌شدن به سرور گوگل فرستاده می‌شود." />
+                <EditText android:id="@+id/etApiKey"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="کلید API" android:inputType="textPassword"
+                    android:layoutDirection="ltr" android:textDirection="ltr" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="صدا:" android:textSize="14sp" android:paddingTop="6dp" />
+                <Spinner android:id="@+id/spVoice"
+                    android:layout_width="match_parent" android:layout_height="wrap_content" />
+                <EditText android:id="@+id/etModel"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="نام مدل" android:inputType="text"
+                    android:layoutDirection="ltr" android:textDirection="ltr" />
+                <EditText android:id="@+id/etStyle"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="لحن خواندن (اختیاری)" android:inputType="textMultiLine" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

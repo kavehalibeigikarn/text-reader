@@ -5,6 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.speech.tts.TextToSpeech
 import android.view.View
 import android.widget.AdapterView
@@ -63,6 +65,10 @@ class MainActivity : AppCompatActivity() {
             open(i)
         }
 
+        val ver = try { packageManager.getPackageInfo(packageName, 0).versionName } catch (e: Exception) { "?" }
+        findViewById<TextView>(R.id.tvVersion).text = "نسخه $ver"
+
+        setupCloud()
         setupSeekBars()
         setupOcr()
         setupSwitches()
@@ -194,6 +200,56 @@ class MainActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(s: SeekBar?) {}
             override fun onStopTrackingTouch(s: SeekBar?) {}
         })
+    }
+
+    private val cloudVoices = listOf(
+        "Kore", "Puck", "Charon", "Zephyr", "Leda", "Aoede", "Callirrhoe", "Autonoe",
+        "Enceladus", "Iapetus", "Umbriel", "Algieba", "Despina", "Erinome", "Algenib",
+        "Rasalgethi", "Laomedeia", "Achernar", "Alnilam", "Schedar", "Gacrux",
+        "Pulcherrima", "Achird", "Zubenelgenubi", "Vindemiatrix", "Sadachbia",
+        "Sadaltager", "Sulafat", "Orus", "Fenrir"
+    )
+
+    private fun setupCloud() {
+        findViewById<MaterialSwitch>(R.id.swCloud).apply {
+            isChecked = Prefs.cloudEnabled
+            setOnCheckedChangeListener { _, c -> Prefs.cloudEnabled = c }
+        }
+        findViewById<EditText>(R.id.etApiKey).apply {
+            setText(Prefs.cloudApiKey)
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+                override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+                override fun afterTextChanged(s: Editable?) { Prefs.cloudApiKey = s?.toString() ?: "" }
+            })
+        }
+        findViewById<EditText>(R.id.etModel).apply {
+            setText(Prefs.cloudModel)
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+                override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+                override fun afterTextChanged(s: Editable?) { Prefs.cloudModel = s?.toString() ?: "" }
+            })
+        }
+        findViewById<EditText>(R.id.etStyle).apply {
+            setText(Prefs.cloudStyle)
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+                override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+                override fun afterTextChanged(s: Editable?) { Prefs.cloudStyle = s?.toString() ?: "" }
+            })
+        }
+        findViewById<Spinner>(R.id.spVoice).apply {
+            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, cloudVoices)
+            val idx = cloudVoices.indexOf(Prefs.cloudVoice)
+            if (idx >= 0) setSelection(idx, false)
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    Prefs.cloudVoice = cloudVoices[position]
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        }
     }
 
     private fun setupOcr() {

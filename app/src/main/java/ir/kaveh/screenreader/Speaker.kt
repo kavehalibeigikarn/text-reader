@@ -139,17 +139,19 @@ object Speaker {
         return s to i
     }
 
+    fun cloudOn(): Boolean = Prefs.cloudEnabled && Prefs.cloudApiKey.isNotBlank()
+
     fun speak(text: String) {
         val clean = TextTools.normalize(text)
         if (clean.isEmpty()) return
-        if (!faReady) {
+        if (!faReady && !cloudOn()) {
             pendingText = clean
             return
         }
-        chunks = TextTools.chunk(clean)
+        chunks = TextTools.chunk(clean, if (cloudOn()) 700 else 350)
         if (chunks.isEmpty()) return
 
-        if (!warnedNoPersian && persianSupport() < TextToSpeech.LANG_AVAILABLE &&
+        if (!cloudOn() && !warnedNoPersian && persianSupport() < TextToSpeech.LANG_AVAILABLE &&
             chunks.any { !TextTools.isMostlyLatin(it) }
         ) {
             warnedNoPersian = true
@@ -162,8 +164,33 @@ object Speaker {
         session++
         faTts?.stop()
         enTts?.stop()
+        CloudTts.stop()
         state = State.SPEAKING
         notifyState()
+
+        if (cloudOn()) {
+            index = i
+            val sess = session
+            CloudTts.start(
+                chunks, i,
+                onIndex = { j -> if (sess == session) index = j },
+                onDone = {
+                    if (sess == session) {
+                        state = State.IDLE
+                        notifyState()
+                        onFinished?.invoke()
+                    }
+                },
+                onError = { msg ->
+                    if (sess == session) {
+                        state = State.IDLE
+                        notifyState()
+                        onWarning?.invoke("صدای ابری: $msg")
+                    }
+                }
+            )
+            return
+        }
         speakChunk(i)
     }
 
@@ -185,6 +212,7 @@ object Speaker {
         session++
         faTts?.stop()
         enTts?.stop()
+        CloudTts.stop()
         state = State.PAUSED
         notifyState()
     }
@@ -205,6 +233,7 @@ object Speaker {
         session++
         faTts?.stop()
         enTts?.stop()
+        CloudTts.stop()
         chunks = emptyList()
         index = 0
         pendingText = null
