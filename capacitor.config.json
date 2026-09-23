@@ -1,0 +1,9 @@
+{
+  "appId": "com.kaveh.pilgercut",
+  "appName": "طول برش پیلگر",
+  "webDir": "www",
+  "backgroundColor": "#14110D",
+  "android": {
+    "adjustMarginsForEdgeToEdge": "force"
+  }
+}

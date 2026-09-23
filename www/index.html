@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>محاسبه‌گر طول برش پیلگر</title>
+<meta name="description" content="محاسبه طول برش لوله برنجی بعد از پیلگر بر اساس قطر خارجی، قطر داخلی و وزن لوله">
+<meta name="theme-color" content="#14110D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="طول برش پیلگر">
+<!-- Android app: fonts bundled locally so the app works fully offline -->
+<link href="fonts/fonts.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14110D;
+    --panel:#1E1810;
+    --panel-2:#241C12;
+    --inset:#0F0C08;
+    --brass:#C9A227;
+    --brass-bright:#E8C158;
+    --copper:#B5651D;
+    --copper-bright:#D4824A;
+    --patina:#6B9080;
+    --paper:#EDE6D6;
+    --paper-dim:#9C9082;
+    --danger:#C7705D;
+    --border:rgba(201,162,39,0.22);
+    --radius:7px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(0deg, rgba(201,162,39,0.025) 0px, rgba(201,162,39,0.025) 1px, transparent 1px, transparent 28px),
+      repeating-linear-gradient(90deg, rgba(201,162,39,0.025) 0px, rgba(201,162,39,0.025) 1px, transparent 1px, transparent 28px),
+      radial-gradient(ellipse at 30% 0%, #1c160e 0%, var(--bg) 55%);
+    color:var(--paper);
+    font-family:'Vazirmatn', Tahoma, sans-serif;
+    min-height:100vh;
+    padding:18px 14px 40px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap{max-width:460px; margin:0 auto;}
+
+  header{margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid var(--border); position:relative;}
+  .eyebrow{
+    font-size:12.5px; color:var(--brass); letter-spacing:0.04em;
+    display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:500;
+  }
+  .eyebrow::before{content:""; width:16px; height:1px; background:var(--brass); display:inline-block;}
+  h1{
+    font-family:'Lalezar', 'Vazirmatn', sans-serif;
+    font-weight:400;
+    font-size:28px;
+    line-height:1.45;
+    margin:0;
+    color:var(--paper);
+    letter-spacing:0.01em;
+  }
+  h1 span{color:var(--brass-bright);}
+  .sub{font-size:13px; color:var(--paper-dim); margin-top:8px; line-height:1.7;}
+
+  .section-label{
+    font-size:12px; color:var(--paper-dim); letter-spacing:0.03em;
+    margin:26px 0 10px 2px; display:flex; align-items:center; gap:8px;
+  }
+  .section-label::after{content:""; flex:1; height:1px; background:var(--border);}
+
+  .field{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:11px 14px 12px;
+    margin-bottom:10px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field:focus-within{
+    border-color:var(--brass);
+    box-shadow:0 0 0 3px rgba(201,162,39,0.12);
+  }
+  .field label{
+    display:block; font-size:12.5px; color:var(--paper-dim); margin-bottom:7px; font-weight:500;
+  }
+  .field-row{
+    direction:ltr; display:flex; align-items:center; gap:8px;
+    background:var(--inset); border-radius:5px; padding:4px 4px 4px 10px;
+  }
+  .field-row input{
+    flex:1; min-width:0; background:transparent; border:0; outline:0;
+    font-family:'JetBrains Mono', monospace; font-weight:600;
+    font-size:20px; color:var(--paper); padding:9px 4px;
+    direction:ltr; text-align:left;
+  }
+  .field-row input::placeholder{color:#54493a;}
+  .unit{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--brass);
+    background:rgba(201,162,39,0.12); padding:5px 9px; border-radius:4px;
+    border:1px solid rgba(201,162,39,0.18); white-space:nowrap;
+  }
+
+  .diagram-panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 10px 14px;
+    display:flex; flex-direction:column; align-items:center;
+    margin-bottom:6px;
+  }
+  .diagram-panel svg{width:150px; height:150px; display:block;}
+  .diagram-caption{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--paper-dim);
+    margin-top:10px; direction:ltr; letter-spacing:0.02em;
+  }
+  .diagram-caption b{color:var(--brass-bright); font-weight:600;}
+  .diagram-caption-sub{
+    font-family:'Vazirmatn', sans-serif; font-size:12px; color:var(--paper-dim);
+    margin-top:4px;
+  }
+  .diagram-caption-sub b{
+    font-family:'JetBrains Mono', monospace; color:var(--patina); font-weight:600;
+  }
+
+  .result-card{
+    margin-top:24px;
+    background:linear-gradient(180deg, var(--panel-2), var(--panel));
+    border:1px solid var(--brass);
+    border-radius:var(--radius);
+    padding:18px 18px 16px;
+    box-shadow:0 0 0 1px rgba(201,162,39,0.08), 0 10px 30px -12px rgba(201,162,39,0.25);
+    position:relative;
+    overflow:hidden;
+  }
+  .result-card::before{
+    content:""; position:absolute; inset:0 0 auto 0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--brass-bright), transparent);
+  }
+  .result-label{font-size:12.5px; color:var(--paper-dim); margin-bottom:6px;}
+  .result-value{
+    direction:ltr; display:flex; align-items:baseline; gap:8px; justify-content:flex-start;
+  }
+  .result-num{
+    font-family:'JetBrains Mono', monospace; font-weight:700;
+    font-size:42px; color:var(--brass-bright);
+    text-shadow:0 0 18px rgba(232,193,88,0.35);
+    transition: color .2s ease;
+  }
+  .result-unit{font-family:'JetBrains Mono', monospace; font-size:16px; color:var(--brass);}
+  .result-error{
+    font-size:13.5px; color:var(--danger); line-height:1.7; display:none;
+  }
+  .result-error.show{display:block;}
+  .result-value.hidden{display:none;}
+
+  .output-list{margin-bottom:14px;}
+  .output-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:13px; padding:7px 0; border-bottom:1px solid rgba(201,162,39,0.08);
+  }
+  .output-row:first-child{padding-top:0;}
+  .output-label{color:var(--paper-dim);}
+  .output-val{
+    font-family:'JetBrains Mono', monospace; font-weight:600; color:var(--paper);
+    direction:ltr; white-space:nowrap;
+  }
+  .output-val b{color:var(--brass-bright); font-weight:700;}
+  .result-divider{height:1px; background:var(--border); margin:4px 0 16px;}
+  .condition-note{
+    font-size:12.5px; color:var(--patina); line-height:1.8; margin-top:10px;
+    background:rgba(107,144,128,0.1); border:1px solid rgba(107,144,128,0.25);
+    border-radius:5px; padding:9px 11px;
+  }
+  .condition-note.warn{
+    color:var(--danger); background:rgba(199,112,93,0.1); border-color:rgba(199,112,93,0.3);
+  }
+
+  .record-btn{
+    margin-top:16px; width:100%; padding:12px;
+    background:linear-gradient(180deg, var(--brass-bright), var(--brass));
+    color:#1a1408; border:none; border-radius:6px;
+    font-family:'Vazirmatn', sans-serif; font-weight:700; font-size:14px;
+    cursor:pointer; transition:filter .15s ease, transform .1s ease;
+  }
+  .record-btn:active{transform:scale(0.98); filter:brightness(0.95);}
+  .record-btn:disabled{opacity:0.4; cursor:not-allowed;}
+  .record-toast{
+    font-size:12px; color:var(--patina); text-align:center; margin-top:8px;
+    height:16px; opacity:0; transition:opacity .2s ease;
+  }
+  .record-toast.show{opacity:1;}
+
+  .history-panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:6px 14px 14px;
+    margin-bottom:6px;
+  }
+  .history-empty{
+    font-size:13px; color:var(--paper-dim); text-align:center; padding:18px 4px;
+  }
+  .history-item{
+    padding:11px 0; border-bottom:1px solid rgba(201,162,39,0.08);
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .history-item:last-child{border-bottom:none;}
+  .history-top{
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .history-time{font-size:11px; color:var(--paper-dim); font-family:'JetBrains Mono', monospace; direction:ltr;}
+  .history-del{
+    background:none; border:none; color:var(--danger); font-size:12px; cursor:pointer;
+    padding:2px 6px; opacity:0.75;
+  }
+  .history-inputs{
+    font-size:12px; color:var(--paper-dim); font-family:'JetBrains Mono', monospace; direction:ltr;
+  }
+  .history-output{
+    font-size:14px; color:var(--brass-bright); font-family:'JetBrains Mono', monospace;
+    font-weight:700; direction:ltr;
+  }
+  .history-output span{color:var(--paper-dim); font-weight:500; font-size:12px; font-family:'Vazirmatn', sans-serif;}
+  .clear-history-btn{
+    margin-top:10px; width:100%; padding:9px; background:none;
+    border:1px solid var(--border); border-radius:5px; color:var(--paper-dim);
+    font-family:'Vazirmatn', sans-serif; font-size:12.5px; cursor:pointer;
+  }
+  .clear-history-btn:active{filter:brightness(1.3);}
+  .clear-history-btn.danger{color:var(--danger); border-color:rgba(199,112,93,0.3);}
+  .history-actions{display:flex; flex-direction:column; gap:8px;}
+  .storage-warning{
+    font-size:12px; line-height:1.8; color:var(--danger);
+    background:rgba(199,112,93,0.08); border:1px solid rgba(199,112,93,0.25);
+    border-radius:6px; padding:10px 12px; margin-bottom:10px;
+  }
+
+  .details-toggle{
+    margin-top:14px; background:none; border:none; color:var(--patina);
+    font-family:'Vazirmatn', sans-serif; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; gap:6px; padding:6px 2px;
+    width:100%; justify-content:flex-start;
+  }
+  .details-toggle .chev{transition:transform .2s ease; font-size:11px;}
+  .details-toggle.open .chev{transform:rotate(180deg);}
+  .details{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+  }
+  .details.open{max-height:200px;}
+  .details-inner{padding-top:12px; border-top:1px solid var(--border); margin-top:6px;}
+  .detail-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13px; padding:6px 0; color:var(--paper-dim);
+  }
+  .detail-row b{
+    font-family:'JetBrains Mono', monospace; color:var(--paper); font-weight:600; direction:ltr;
+  }
+
+  footer{
+    margin-top:30px; font-size:11.5px; color:#5e5546; line-height:1.8; text-align:center;
+  }
+
+  .multi-panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:6px 14px;
+    margin-bottom:6px;
+  }
+  .multi-table{
+    width:100%; border-collapse:collapse;
+  }
+  .multi-table th{
+    text-align:right; font-size:12px; color:var(--paper-dim); font-weight:500;
+    padding:10px 4px 8px; border-bottom:1px solid var(--border);
+  }
+  .multi-table td{
+    font-family:'JetBrains Mono', monospace; font-size:14.5px; color:var(--paper);
+    padding:9px 4px; border-bottom:1px solid rgba(201,162,39,0.08);
+  }
+  .multi-table td:first-child{
+    color:var(--brass-bright); font-weight:600; width:70px;
+  }
+  .multi-table td:last-child{
+    direction:ltr; text-align:left;
+  }
+  .multi-table tr:last-child td{border-bottom:none;}
+  .multi-table tr.selected td{
+    color:var(--brass-bright); background:rgba(201,162,39,0.08);
+  }
+  .multi-table tr.selected td:first-child::after{
+    content:" ✓"; color:var(--patina);
+  }
+  .multi-error{
+    font-size:13px; color:var(--danger); padding:10px 2px; display:none;
+  }
+  .multi-error.show{display:block;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">پیلگر برنج · CuZn36</div>
+    <h1>محاسبه‌گر <span>طول برش</span> لوله بعد از پیلگر</h1>
+    <div class="sub">قطر خارجی، ضخامت لوله نهایی و وزن نمونه‌ی ۲۵ سانتی‌متری خروجی از پیلگر را وارد کن تا طول برش لازم محاسبه بشه.</div>
+  </header>
+
+  <div class="section-label">ورودی‌ها</div>
+
+  <div class="field">
+    <label for="outerD">قطر خارجی لوله نهایی</label>
+    <div class="field-row">
+      <input id="outerD" type="text" inputmode="decimal" placeholder="مثلاً 18" value="18">
+      <span class="unit">mm</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="thickness">ضخامت لوله نهایی</label>
+    <div class="field-row">
+      <input id="thickness" type="text" inputmode="decimal" placeholder="مثلاً 0.5" value="0.5">
+      <span class="unit">mm</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="pilgerW">وزن نمونه ۲۵ سانتی‌متری لوله خروجی از پیلگر</label>
+    <div class="field-row">
+      <input id="pilgerW" type="text" inputmode="decimal" placeholder="مثلاً 478" value="478">
+      <span class="unit">gr</span>
+    </div>
+  </div>
+
+  <div class="diagram-panel">
+    <svg id="diagram" viewBox="0 0 200 200"></svg>
+    <div class="diagram-caption">⌀<b id="capOuter">18</b> mm &nbsp;/&nbsp; t <b id="capThickness">0.5</b> mm</div>
+    <div class="diagram-caption-sub">قطر داخلی محاسبه‌شده: <span style="white-space:nowrap"><b id="capInnerComputed">17</b> mm</span></div>
+  </div>
+
+  <div class="result-card">
+    <div class="output-list">
+      <div class="output-row">
+        <span class="output-label">۱. قطر داخلی لوله نهایی (ID)</span>
+        <span class="output-val"><b id="outID">—</b> mm</span>
+      </div>
+      <div class="output-row">
+        <span class="output-label">۲. وزن یک متر خروجی پیلگر</span>
+        <span class="output-val"><b id="outW1m">—</b> kg</span>
+      </div>
+      <div class="output-row">
+        <span class="output-label">۳. وزن لوله ۳ متری نهایی</span>
+        <span class="output-val"><b id="outW3m">—</b> kg</span>
+      </div>
+    </div>
+
+    <div class="result-divider"></div>
+
+    <div class="result-label">۴. طول برش بعد از پیلگر (خروجی نهایی)</div>
+    <div class="result-value" id="resultValue">
+      <span class="result-num" id="resultNum">—</span>
+      <span class="result-unit">m</span>
+    </div>
+    <div class="result-error" id="resultError"></div>
+    <div class="condition-note" id="conditionNote" style="display:none"></div>
+
+    <button class="details-toggle" id="detailsToggle">
+      <span class="chev">▾</span> نمایش جزئیات محاسبه
+    </button>
+    <div class="details" id="details">
+      <div class="details-inner">
+        <div class="detail-row"><span>مساحت مقطع لوله نهایی</span><b id="dArea">—</b></div>
+        <div class="detail-row"><span>طول برش با فرمول استاندارد</span><b id="dStandard">—</b></div>
+        <div class="detail-row"><span>مقدار پایه X (فرمول جایگزین)</span><b id="dBaseX">—</b></div>
+        <table class="multi-table" id="multiTable" style="margin-top:8px;">
+          <thead>
+            <tr><th>ضریب</th><th>مقدار (m)</th></tr>
+          </thead>
+          <tbody id="multiTableBody"></tbody>
+        </table>
+        <div class="multi-error" id="multiError"></div>
+      </div>
+    </div>
+
+    <button class="record-btn" id="recordBtn">نمایش نتیجه و ثبت در تاریخچه</button>
+    <div class="record-toast" id="recordToast">ثبت شد ✓</div>
+  </div>
+
+  <div class="section-label">تاریخچه محاسبات</div>
+  <div class="storage-warning" id="storageWarning" style="display:none;">
+    حافظه مرورگر در این حالت اجرا (فایل محلی) در دسترس نیست؛ تاریخچه فقط تا وقتی این صفحه باز است باقی می‌ماند. برای نگهداری دائمی، از دکمه‌ی «خروجی گرفتن» زیر استفاده کن، یا اپ را از طریق یک لینک آنلاین (https) اجرا کن.
+  </div>
+  <div class="history-panel" id="historyPanel">
+    <div class="history-empty" id="historyEmpty">هنوز محاسبه‌ای ثبت نشده.</div>
+    <div id="historyList"></div>
+    <div class="history-actions" id="historyActions" style="display:none;">
+      <button class="clear-history-btn" id="exportHistoryBtn">خروجی گرفتن (دانلود فایل)</button>
+      <button class="clear-history-btn" id="importHistoryBtn">بارگذاری از فایل</button>
+      <input type="file" id="importHistoryInput" accept="application/json" style="display:none;">
+      <button class="clear-history-btn danger" id="clearHistoryBtn">پاک کردن تاریخچه</button>
+    </div>
+  </div>
+
+  <footer>
+    فرمول بر اساس شیت محاسباتی کارگاه (چگالی برنج 8.45 g/cm³). در صورت تغییر فرآیند یا آلیاژ، ثابت‌های محاسبه را بازبینی کن.
+  </footer>
+
+</div>
+
+<script>
+  const outerEl = document.getElementById('outerD');
+  const thicknessEl = document.getElementById('thickness');
+  const weightEl = document.getElementById('pilgerW');
+
+  const resultNumEl = document.getElementById('resultNum');
+  const resultValueEl = document.getElementById('resultValue');
+  const resultErrorEl = document.getElementById('resultError');
+  const conditionNoteEl = document.getElementById('conditionNote');
+
+  const outIDEl = document.getElementById('outID');
+  const outW1mEl = document.getElementById('outW1m');
+  const outW3mEl = document.getElementById('outW3m');
+
+  const dAreaEl = document.getElementById('dArea');
+  const dStandardEl = document.getElementById('dStandard');
+  const dBaseXEl = document.getElementById('dBaseX');
+
+  const diagramEl = document.getElementById('diagram');
+  const capOuterEl = document.getElementById('capOuter');
+  const capThicknessEl = document.getElementById('capThickness');
+  const capInnerComputedEl = document.getElementById('capInnerComputed');
+
+  const multiTableBodyEl = document.getElementById('multiTableBody');
+  const multiTableEl = document.getElementById('multiTable');
+  const multiErrorEl = document.getElementById('multiError');
+
+  const recordBtnEl = document.getElementById('recordBtn');
+  const recordToastEl = document.getElementById('recordToast');
+  const historyListEl = document.getElementById('historyList');
+  const historyEmptyEl = document.getElementById('historyEmpty');
+  const historyActionsEl = document.getElementById('historyActions');
+  const clearHistoryBtnEl = document.getElementById('clearHistoryBtn');
+  const exportHistoryBtnEl = document.getElementById('exportHistoryBtn');
+  const importHistoryBtnEl = document.getElementById('importHistoryBtn');
+  const importHistoryInputEl = document.getElementById('importHistoryInput');
+  const storageWarningEl = document.getElementById('storageWarning');
+
+  const detailsToggleEl = document.getElementById('detailsToggle');
+  const detailsEl = document.getElementById('details');
+
+  detailsToggleEl.addEventListener('click', () => {
+    detailsEl.classList.toggle('open');
+    detailsToggleEl.classList.toggle('open');
+  });
+
+  function normalizeDigits(str){
+    const fa = '۰۱۲۳۴۵۶۷۸۹', ar = '٠١٢٣٤٥٦٧٨٩';
+    return str.split('').map(ch => {
+      let i = fa.indexOf(ch);
+      if(i > -1) return String(i);
+      i = ar.indexOf(ch);
+      if(i > -1) return String(i);
+      return ch;
+    }).join('');
+  }
+
+  function parseNum(el){
+    const raw = normalizeDigits(el.value.trim()).replace(/[^0-9.]/g, '');
+    if(raw !== normalizeDigits(el.value.trim())) el.value = raw;
+    const v = parseFloat(raw);
+    return isNaN(v) ? null : v;
+  }
+
+  function fmt(n, decimals){
+    return n.toFixed(decimals);
+  }
+
+  function drawDiagram(D, d){
+    const outerR = 80;
+    const safeD = D > 0 ? D : 1;
+    const ratio = Math.min(Math.max(d / safeD, 0), 0.96);
+    const innerR = outerR * ratio;
+    const cx = 100, cy = 100;
+
+    diagramEl.innerHTML = `
+      <defs>
+        <radialGradient id="ringGrad" cx="38%" cy="32%" r="75%">
+          <stop offset="0%" stop-color="#E8C158"/>
+          <stop offset="55%" stop-color="#C9A227"/>
+          <stop offset="100%" stop-color="#8a6a16"/>
+        </radialGradient>
+      </defs>
+      <circle cx="${cx}" cy="${cy}" r="${outerR}" fill="url(#ringGrad)"/>
+      <circle cx="${cx}" cy="${cy}" r="${innerR}" fill="#1E1810"/>
+      <circle cx="${cx}" cy="${cy}" r="${outerR}" fill="none" stroke="#8a6a16" stroke-width="1.5" opacity="0.6"/>
+      <circle cx="${cx}" cy="${cy}" r="${innerR}" fill="none" stroke="#6B9080" stroke-width="1" stroke-dasharray="3,3" opacity="0.8"/>
+      <line x1="${cx}" y1="${cy - outerR}" x2="${cx}" y2="${cy - innerR}" stroke="#6B9080" stroke-width="1.5" opacity="0.9"/>
+      <circle cx="${cx}" cy="${cy - outerR}" r="2.5" fill="#E8C158"/>
+      <circle cx="${cx}" cy="${cy - innerR}" r="2.5" fill="#6B9080"/>
+    `;
+  }
+
+  let lastCalc = null; // holds the most recent valid calculation, used by the record button
+
+  function calculate(){
+    const D = parseNum(outerEl);
+    const t = parseNum(thicknessEl);
+    const W = parseNum(weightEl);
+
+    capOuterEl.textContent = D !== null ? fmt(D, D % 1 === 0 ? 0 : 2) : '—';
+    capThicknessEl.textContent = t !== null ? fmt(t, t % 1 === 0 ? 0 : 2) : '—';
+
+    const dPreview = (D !== null && t !== null) ? D - 2 * t : null;
+    capInnerComputedEl.textContent = (dPreview !== null && dPreview > 0) ? fmt(dPreview, 2) : '—';
+    drawDiagram(D || 18, dPreview && dPreview > 0 ? dPreview : 0);
+
+    resultErrorEl.classList.remove('show');
+    resultValueEl.classList.remove('hidden');
+    conditionNoteEl.style.display = 'none';
+    multiTableEl.style.display = '';
+    multiErrorEl.classList.remove('show');
+    recordBtnEl.disabled = true;
+    lastCalc = null;
+
+    function clearAll(){
+      outIDEl.textContent = outW1mEl.textContent = outW3mEl.textContent = '—';
+      resultNumEl.textContent = '—';
+      dAreaEl.textContent = dStandardEl.textContent = dBaseXEl.textContent = '—';
+      multiTableEl.style.display = 'none';
+      multiTableBodyEl.innerHTML = '';
+    }
+
+    if(D === null || t === null || W === null){
+      clearAll();
+      return;
+    }
+    if(D <= 0 || W <= 0){
+      resultValueEl.classList.add('hidden');
+      resultErrorEl.textContent = 'مقادیر باید بزرگ‌تر از صفر باشند.';
+      resultErrorEl.classList.add('show');
+      clearAll();
+      return;
+    }
+    if(t <= 0 || t >= D / 2){
+      resultValueEl.classList.add('hidden');
+      resultErrorEl.textContent = 'ضخامت باید بزرگ‌تر از صفر و کوچک‌تر از نصف قطر خارجی باشد.';
+      resultErrorEl.classList.add('show');
+      clearAll();
+      return;
+    }
+
+    // --- outputs 1-3, replicated exactly from the reference spreadsheet ---
+    const d = D - 2 * t; // ID = OD - (TH*2)
+    const weightPer1mPilger_kg = (W * 4) / 1000;
+    const area_mm2 = Math.PI * (Math.pow(D / 2, 2) - Math.pow(d / 2, 2));
+    const weight3m_kg = ((area_mm2 / 100) * 300 * 8.45) / 1000;
+
+    outIDEl.textContent = fmt(d, 2);
+    outW1mEl.textContent = fmt(weightPer1mPilger_kg, 3);
+    outW3mEl.textContent = fmt(weight3m_kg, 3);
+    dAreaEl.textContent = fmt(area_mm2, 2) + ' mm²';
+
+    // --- output 4: conditional logic ---
+    const standardCutLength_m = (((weight3m_kg / 3) * 6.3) + 0.3) / weightPer1mPilger_kg;
+    dStandardEl.textContent = fmt(standardCutLength_m, 4) + ' m';
+
+    const baseX_m = (((weight3m_kg / 3) * 6.25) + 0.2) / weightPer1mPilger_kg;
+    dBaseXEl.textContent = fmt(baseX_m, 4) + ' m';
+
+    const candidates = [2, 3, 4, 5, 6, 7].map(mult => ({ mult, val: baseX_m * mult }));
+
+    multiTableBodyEl.innerHTML = '';
+    candidates.forEach(c => {
+      const tr = document.createElement('tr');
+      const tdLabel = document.createElement('td');
+      tdLabel.textContent = c.mult + 'X';
+      const tdVal = document.createElement('td');
+      tdVal.textContent = fmt(c.val, 4);
+      tr.appendChild(tdLabel);
+      tr.appendChild(tdVal);
+      tr.dataset.mult = c.mult;
+      multiTableBodyEl.appendChild(tr);
+    });
+
+    const conditionApplies = (t > 1) || (D >= 28);
+    let finalOutput, finalNote, finalNoteWarn = false, recordMode;
+
+    if(conditionApplies){
+      finalOutput = standardCutLength_m;
+      finalNote = 'چون ضخامت بیشتر از ۱ میلی‌متر یا قطر خارجی بزرگ‌تر/مساوی ۲۸ میلی‌متر است، از فرمول استاندارد طول برش استفاده شد.';
+      recordMode = 'استاندارد';
+    } else {
+      const eligible = candidates.filter(c => c.val < 6.1);
+      if(eligible.length > 0){
+        const selected = eligible.reduce((a, b) => (b.val > a.val ? b : a));
+        finalOutput = selected.val;
+        finalNote = `چون ضخامت ≤ ۱ میلی‌متر و قطر خارجی < ۲۸ میلی‌متر است، از جدول جایگزین استفاده شد. ضریب انتخاب‌شده: ${selected.mult}X (بزرگ‌ترین مقدار کوچک‌تر از ۶.۱ متر).`;
+        recordMode = selected.mult + 'X';
+        const row = multiTableBodyEl.querySelector(`tr[data-mult="${selected.mult}"]`);
+        if(row) row.classList.add('selected');
+      } else {
+        finalOutput = null;
+        finalNote = 'هیچ‌کدام از مقادیر ۲X تا ۷X کوچک‌تر از ۶.۱ متر نیستند؛ مقدار خروجی چهارم قابل تعیین نیست.';
+        finalNoteWarn = true;
+        recordMode = '—';
+      }
+    }
+
+    // Don't display or record output 4 yet — wait for the button press.
+    // This keeps the displayed/recorded number always in sync with an explicit user action.
+    resultNumEl.textContent = '—';
+    conditionNoteEl.style.display = 'none';
+    recordBtnEl.disabled = false;
+
+    lastCalc = {
+      D, t, W, d,
+      w1m: weightPer1mPilger_kg,
+      w3m: weight3m_kg,
+      output4: finalOutput,
+      note: finalNote,
+      warn: finalNoteWarn,
+      mode: recordMode
+    };
+  }
+
+  // ---------------- history ----------------
+  const HISTORY_KEY = 'pilgerCutHistory_v1';
+
+  // Feature-detect localStorage: WebKit (Safari/iOS) blocks it entirely for file:// pages,
+  // so opening this app directly from disk can make localStorage throw or be unavailable.
+  let storageAvailable = false;
+  try {
+    const testKey = '__pilger_storage_test__';
+    window.localStorage.setItem(testKey, '1');
+    window.localStorage.removeItem(testKey);
+    storageAvailable = true;
+  } catch(e){
+    storageAvailable = false;
+  }
+
+  let memoryHistory = []; // fallback store, lost on page close, used when storageAvailable is false
+
+  if(!storageAvailable){
+    storageWarningEl.style.display = 'block';
+  }
+
+  function loadHistory(){
+    if(!storageAvailable) return memoryHistory;
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e){ return []; }
+  }
+
+  function saveHistory(arr){
+    if(!storageAvailable){
+      memoryHistory = arr;
+      return;
+    }
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); } catch(e){ /* storage unavailable */ }
+  }
+
+  function formatTime(ts){
+    try {
+      return new Date(ts).toLocaleString('fa-IR', { dateStyle: 'short', timeStyle: 'short' });
+    } catch(e){
+      return new Date(ts).toLocaleString();
+    }
+  }
+
+  function renderHistory(){
+    const items = loadHistory();
+    historyListEl.innerHTML = '';
+    if(items.length === 0){
+      historyEmptyEl.style.display = 'block';
+      historyActionsEl.style.display = 'none';
+      return;
+    }
+    historyEmptyEl.style.display = 'none';
+    historyActionsEl.style.display = 'flex';
+
+    items.forEach(entry => {
+      const row = document.createElement('div');
+      row.className = 'history-item';
+      row.innerHTML = `
+        <div class="history-top">
+          <span class="history-time">${formatTime(entry.ts)}</span>
+          <button class="history-del" data-id="${entry.id}">حذف</button>
+        </div>
+        <div class="history-inputs">OD ${fmt(entry.D,2)} · TH ${fmt(entry.t,2)} · W ${fmt(entry.W,2)}gr → ID ${fmt(entry.d,2)}mm</div>
+        <div class="history-output">${fmt(entry.output4,4)} m <span>(${entry.mode})</span></div>
+      `;
+      historyListEl.appendChild(row);
+    });
+
+    historyListEl.querySelectorAll('.history-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const filtered = loadHistory().filter(e => String(e.id) !== id);
+        saveHistory(filtered);
+        renderHistory();
+      });
+    });
+  }
+
+  recordBtnEl.addEventListener('click', () => {
+    if(!lastCalc) return;
+
+    // Show the result and the condition explanation, regardless of outcome.
+    conditionNoteEl.style.display = 'block';
+    conditionNoteEl.textContent = lastCalc.note;
+    conditionNoteEl.classList.toggle('warn', lastCalc.warn);
+
+    if(lastCalc.output4 === null){
+      resultNumEl.textContent = '—';
+      return; // nothing valid to record
+    }
+
+    resultNumEl.textContent = fmt(lastCalc.output4, 4);
+
+    const items = loadHistory();
+    items.unshift({
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      ts: Date.now(),
+      D: lastCalc.D, t: lastCalc.t, W: lastCalc.W, d: lastCalc.d,
+      output4: lastCalc.output4, mode: lastCalc.mode
+    });
+    saveHistory(items.slice(0, 200));
+    renderHistory();
+    recordToastEl.classList.add('show');
+    setTimeout(() => recordToastEl.classList.remove('show'), 1400);
+  });
+
+  clearHistoryBtnEl.addEventListener('click', () => {
+    saveHistory([]);
+    renderHistory();
+  });
+
+  exportHistoryBtnEl.addEventListener('click', async () => {
+    const items = loadHistory();
+
+    // Android app: WebView can't download blob links, so write the file and open the share sheet
+    // (Telegram, Drive, file manager, ...). Same JSON content and file name as the web version.
+    const cap = window.Capacitor;
+    if(cap && cap.isNativePlatform && cap.isNativePlatform() && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share){
+      const fileName = `pilger-cut-history-${new Date().toISOString().slice(0, 10)}.json`;
+      try {
+        const res = await cap.Plugins.Filesystem.writeFile({
+          path: fileName,
+          data: JSON.stringify(items, null, 2),
+          directory: 'CACHE',
+          encoding: 'utf8'
+        });
+        await cap.Plugins.Share.share({ title: 'خروجی تاریخچه طول برش پیلگر', files: [res.uri] });
+      } catch(err){
+        const msg = String((err && err.message) || err);
+        if(!/cancel/i.test(msg)) alert('خروجی گرفتن انجام نشد: ' + msg);
+      }
+      return;
+    }
+
+    const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `pilger-cut-history-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+
+  importHistoryBtnEl.addEventListener('click', () => {
+    importHistoryInputEl.click();
+  });
+
+  importHistoryInputEl.addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const imported = JSON.parse(reader.result);
+        if(!Array.isArray(imported)) throw new Error('invalid format');
+        const existing = loadHistory();
+        const existingIds = new Set(existing.map(x => x.id));
+        const merged = existing.concat(imported.filter(x => x && x.id && !existingIds.has(x.id)));
+        merged.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+        saveHistory(merged.slice(0, 200));
+        renderHistory();
+      } catch(err){
+        alert('فایل بارگذاری‌شده معتبر نیست.');
+      }
+      importHistoryInputEl.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  renderHistory();
+
+  [outerEl, thicknessEl, weightEl].forEach(el => {
+    el.addEventListener('input', calculate);
+  });
+
+  calculate();
+
+  if('serviceWorker' in navigator && !(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
