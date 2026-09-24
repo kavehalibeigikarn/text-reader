@@ -1,5 +1,7 @@
 package ir.kaveh.screenreader
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
@@ -15,12 +17,32 @@ import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
+import java.security.MessageDigest
 
 /**
  * خواندن متن با صدای ابری Gemini TTS.
  * هر تکه متن جداگانه گرفته و پخش می‌شود و تکه بعدی هم‌زمان با پخش، از پیش دانلود می‌شود.
  */
 object CloudTts {
+
+    private lateinit var appCtx: Context
+    private var androidCert: String? = null
+
+    fun init(ctx: Context) {
+        appCtx = ctx.applicationContext
+    }
+
+    /** اثر انگشت SHA-1 امضای برنامه؛ برای کلیدهایی که به این اپ محدود شده‌اند */
+    private fun certSha1(): String? {
+        androidCert?.let { return it }
+        return try {
+            val pm = appCtx.packageManager
+            val info = pm.getPackageInfo(appCtx.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+            val sig = info.signingInfo?.apkContentsSigners?.firstOrNull() ?: return null
+            val md = MessageDigest.getInstance("SHA1").digest(sig.toByteArray())
+            md.joinToString("") { "%02X".format(it) }.also { androidCert = it }
+        } catch (_: Exception) { null }
+    }
 
     private val net = Executors.newFixedThreadPool(2)
     private val player = Executors.newSingleThreadExecutor()
@@ -82,7 +104,7 @@ object CloudTts {
         if (key.isEmpty()) throw IllegalStateException("کلید API وارد نشده")
 
         val model = Prefs.cloudModel.trim().ifEmpty { "gemini-2.5-flash-preview-tts" }
-        val url = URL("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent")
+        val url = URL("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$key")
 
         val prompt = JSONObject().apply {
             put("contents", JSONArray().put(JSONObject().apply {
@@ -104,6 +126,10 @@ object CloudTts {
             doOutput = true
             setRequestProperty("Content-Type", "application/json; charset=utf-8")
             setRequestProperty("x-goog-api-key", key)
+            if (::appCtx.isInitialized) {
+                setRequestProperty("X-Android-Package", appCtx.packageName)
+                certSha1()?.let { setRequestProperty("X-Android-Cert", it) }
+            }
         }
         conn.outputStream.use { it.write(prompt.toString().toByteArray(Charsets.UTF_8)) }
 
@@ -112,11 +138,41 @@ object CloudTts {
             ?.bufferedReader()?.use(BufferedReader::readText) ?: ""
         conn.disconnect()
 
-        if (code !in 200..299) throw IllegalStateException("خطای سرور ($code): ${body.take(200)}")
+        if (code !in 200..299) throw IllegalStateException(describe(code, body))
 
         val json = JSONObject(body)
         val b64 = findAudioData(json) ?: throw IllegalStateException("پاسخ صوتی دریافت نشد: ${body.take(200)}")
         return Base64.decode(b64, Base64.DEFAULT)
+    }
+
+    /** خطا را به پیام قابل‌فهم تبدیل می‌کند */
+    private fun describe(code: Int, body: String): String {
+        val t = body.trim()
+        if (t.startsWith("<")) {
+            val plain = t.replace(Regex("(?s)<script.*?</script>"), " ")
+                .replace(Regex("(?s)<style.*?</style>"), " ")
+                .replace(Regex("<[^>]+>"), " ")
+                .replace(Regex("\\s+"), " ")
+                .trim()
+            return "خطای $code — پاسخ HTML به‌جای JSON: ${plain.take(220)}"
+        }
+        val msg = try {
+            JSONObject(t).optJSONObject("error")?.optString("message").orEmpty()
+        } catch (_: Exception) { "" }
+        return if (msg.isNotEmpty()) "خطای $code: $msg" else "خطای $code: ${t.take(220)}"
+    }
+
+    /** آزمایش سریع تنظیمات ابری */
+    fun test(callback: (Boolean, String) -> Unit) {
+        net.execute {
+            val result = try {
+                val bytes = request("سلام، این یک آزمایش است.")
+                true to "موفق بود. ${bytes.size / 1024} کیلوبایت صدا دریافت شد."
+            } catch (e: Throwable) {
+                false to (e.message ?: e.toString())
+            }
+            main.post { callback(result.first, result.second) }
+        }
     }
 
     /** در ساختار پاسخ دنبال داده صوتی base64 می‌گردد (سازگار با شکل‌های مختلف پاسخ) */

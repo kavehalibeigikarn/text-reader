@@ -18,6 +18,7 @@ import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.materialswitch.MaterialSwitch
 import java.util.Locale
@@ -74,8 +75,23 @@ class MainActivity : AppCompatActivity() {
         setupSwitches()
 
         val et = findViewById<EditText>(R.id.etTest)
-        findViewById<Button>(R.id.btnSpeak).setOnClickListener { Speaker.speak(et.text.toString()) }
+        findViewById<Button>(R.id.btnSpeak).setOnClickListener {
+            val t = et.text.toString()
+            if (t.isBlank()) Toast.makeText(this, "کادر متن خالی است", Toast.LENGTH_SHORT).show()
+            else Speaker.speak(t)
+        }
+        findViewById<Button>(R.id.btnPause).setOnClickListener { Speaker.togglePause() }
         findViewById<Button>(R.id.btnStop).setOnClickListener { Speaker.stop() }
+        findViewById<Button>(R.id.btnClear).setOnClickListener { et.setText("") }
+        findViewById<Button>(R.id.btnPaste).setOnClickListener {
+            val clip = clipboardText()
+            if (clip.isNullOrBlank()) {
+                Toast.makeText(this, "چیزی در کلیپ‌بورد نیست", Toast.LENGTH_SHORT).show()
+            } else {
+                et.setText(clip)
+                Speaker.speak(clip)
+            }
+        }
 
         spEngine.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -116,6 +132,13 @@ class MainActivity : AppCompatActivity() {
         Speaker.removeListener(speakerListener)
         Speaker.onWarning = ReaderService.instance?.let { svc -> { msg: String -> svc.showWarning(msg) } }
         super.onPause()
+    }
+
+    private fun clipboardText(): String? {
+        val cm = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        val clip = cm.primaryClip ?: return null
+        if (clip.itemCount == 0) return null
+        return clip.getItemAt(0).coerceToText(this)?.toString()
     }
 
     private fun open(i: Intent) {
@@ -239,6 +262,21 @@ class MainActivity : AppCompatActivity() {
                 override fun afterTextChanged(s: Editable?) { Prefs.cloudStyle = s?.toString() ?: "" }
             })
         }
+        findViewById<Button>(R.id.btnTestCloud).setOnClickListener {
+            Toast.makeText(this, "در حال آزمایش…", Toast.LENGTH_SHORT).show()
+            CloudTts.test { ok, msg ->
+                AlertDialog.Builder(this)
+                    .setTitle(if (ok) "اتصال برقرار است" else "خطا")
+                    .setMessage(msg)
+                    .setPositiveButton("بستن", null)
+                    .setNeutralButton("کپی متن خطا") { _: android.content.DialogInterface, _: Int ->
+                        val cm = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        cm.setPrimaryClip(android.content.ClipData.newPlainText("error", msg))
+                    }
+                    .show()
+            }
+        }
+
         findViewById<Spinner>(R.id.spVoice).apply {
             adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, cloudVoices)
             val idx = cloudVoices.indexOf(Prefs.cloudVoice)

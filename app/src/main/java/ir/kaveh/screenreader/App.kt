@@ -7,5 +7,6 @@ class App : Application() {
         super.onCreate()
         Prefs.init(this)
         Speaker.init(this)
+        CloudTts.init(this)
     }
 }

@@ -11,8 +11,8 @@ android {
         applicationId = "ir.kaveh.screenreader"
         minSdk = 30          // takeScreenshot() از سرویس دسترسی‌پذیری از API 30
         targetSdk = 35
-        versionCode = 4
-        versionName = "2.0"
+        versionCode = 6
+        versionName = "2.2"
         ndk { abiFilters += listOf("arm64-v8a") }
     }
 

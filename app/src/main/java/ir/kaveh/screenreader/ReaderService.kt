@@ -3,6 +3,7 @@ package ir.kaveh.screenreader
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
 import android.annotation.SuppressLint
+import android.content.ClipboardManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Path
@@ -124,6 +125,7 @@ class ReaderService : AccessibilityService() {
         }
         m.addView(makeButton("📖", 46, dark) { collapse(); startReadScreen() })
         m.addView(makeButton("🔍", 46, dark) { collapse(); startReadOcr() })
+        m.addView(makeButton("📋", 46, dark) { collapse(); readClipboard() })
         val p = makeButton("⏸", 46, dark) { Speaker.togglePause() }
         m.addView(p)
         m.addView(makeButton("⏪", 46, dark) { Speaker.skip(-1) })
@@ -340,6 +342,43 @@ class ReaderService : AccessibilityService() {
             .addStroke(GestureDescription.StrokeDescription(path, 0, 700))
             .build()
         dispatchGesture(gesture, null, null)
+    }
+
+    /**
+     * خواندن متن کپی‌شده. از اندروید ۱۰ به بعد فقط برنامه‌ای که فوکوس دارد می‌تواند
+     * کلیپ‌بورد را بخواند، برای همین یک پنجره نامرئی فوکوس‌دار لحظه‌ای باز می‌شود.
+     */
+    private fun readClipboard() {
+        val focus = View(this)
+        val lp = WindowManager.LayoutParams(
+            1, 1,
+            WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+            0,
+            PixelFormat.TRANSLUCENT
+        ).apply { gravity = Gravity.TOP or Gravity.START }
+
+        try {
+            wm.addView(focus, lp)
+        } catch (_: Exception) {
+        }
+
+        main.postDelayed({
+            val text = try {
+                val cm = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = cm.primaryClip
+                if (clip != null && clip.itemCount > 0)
+                    clip.getItemAt(0).coerceToText(this).toString() else ""
+            } catch (e: Exception) {
+                ""
+            }
+            try { wm.removeView(focus) } catch (_: Exception) {}
+
+            if (text.isBlank()) toast("چیزی در کلیپ‌بورد نیست")
+            else {
+                continuousActive = false
+                Speaker.speak(text)
+            }
+        }, 250)
     }
 
     /** برای منوی «بلند بخوان» */

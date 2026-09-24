@@ -26,6 +26,49 @@
             android:textSize="14sp"
             android:paddingBottom="12dp" />
 
+        <!-- کادر خواندن متن -->
+        <com.google.android.material.card.MaterialCardView style="@style/Card">
+            <LinearLayout style="@style/CardBody">
+                <TextView style="@style/CardTitle" android:text="خواندن متن" />
+                <TextView
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textSize="13sp" android:paddingBottom="6dp"
+                    android:text="متن را اینجا بچسبانید یا تایپ کنید و دکمه بخوان را بزنید." />
+                <EditText android:id="@+id/etTest"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minLines="4" android:maxLines="12" android:gravity="top|start"
+                    android:hint="متن برای خواندن"
+                    android:inputType="textMultiLine" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:paddingTop="6dp">
+                    <Button android:id="@+id/btnSpeak"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:text="بخوان" />
+                    <Button android:id="@+id/btnPause"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:layout_height="wrap_content" android:text="مکث / ادامه" />
+                    <Button android:id="@+id/btnStop"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:layout_height="wrap_content" android:text="توقف" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <Button android:id="@+id/btnPaste"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:text="چسباندن و خواندن" />
+                    <Button android:id="@+id/btnClear"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:text="پاک کردن" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- ۱. سرویس -->
         <com.google.android.material.card.MaterialCardView style="@style/Card">
             <LinearLayout style="@style/CardBody">
@@ -117,6 +160,10 @@
                 <EditText android:id="@+id/etStyle"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:hint="لحن خواندن (اختیاری)" android:inputType="textMultiLine" />
+                <Button android:id="@+id/btnTestCloud"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="آزمایش اتصال ابری" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -158,35 +205,12 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ۵. آزمایش -->
-        <com.google.android.material.card.MaterialCardView style="@style/Card">
-            <LinearLayout style="@style/CardBody">
-                <TextView style="@style/CardTitle" android:text="۵. آزمایش صدا" />
-                <EditText android:id="@+id/etTest"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:minLines="3" android:gravity="top|start"
-                    android:inputType="textMultiLine"
-                    android:text="سلام. این یک متن آزمایشی است. قیمت طلا امروز افزایش یافت. The market opened higher today." />
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <Button android:id="@+id/btnSpeak"
-                        android:layout_width="0dp" android:layout_weight="1"
-                        android:layout_height="wrap_content" android:text="بخوان" />
-                    <Button android:id="@+id/btnStop"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp" android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:layout_height="wrap_content" android:text="توقف" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="13sp"
             android:paddingTop="8dp"
             android:lineSpacingExtra="4dp"
-            android:text="راهنمای دکمه شناور:\n🔊 باز/بسته کردن منو (با کشیدن جابه‌جا می‌شود)\n📖 خواندن متن صفحه (وب، پیام‌رسان، اخبار، PDF)\n🔍 تشخیص متن از تصویر صفحه (PDF اسکن‌شده، عکس، کتاب تصویری)\n⏸ مکث / ادامه     ⏪ ⏩ جمله قبل / بعد\n⏭ صفحه بعد     ⏹ توقف\n\nهمچنین: هر متنی را در هر اپی انتخاب کنید و از منو «بلند بخوان» را بزنید." />
+            android:text="راهنمای دکمه شناور:\n🔊 باز/بسته کردن منو (با کشیدن جابه‌جا می‌شود)\n📖 خواندن متن صفحه (وب، پیام‌رسان، اخبار، PDF)\n🔍 تشخیص متن از تصویر صفحه (PDF اسکن‌شده، عکس، کتاب تصویری)\n⏸ مکث / ادامه     ⏪ ⏩ جمله قبل / بعد\n⏭ صفحه بعد     ⏹ توقف\n📋 خواندن متن کپی‌شده\n\nخواندن متن انتخاب‌شده: در هر اپی متن را انتخاب کنید، در منوی ظاهرشده (در صورت نیاز از ⋮) گزینه «بلند بخوان» را بزنید.\n\nخواندن متن کپی‌شده: دکمه 📋 روی منوی شناور، یا کادر «خواندن متن» در همین صفحه." />
     </LinearLayout>
 </ScrollView>
